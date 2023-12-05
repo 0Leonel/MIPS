@@ -1,9 +1,9 @@
+# Macros para imprimir, leer enteros y finalizar el programa
 .macro print (%label)
 	li $v0, 4
 	la $a0,%label
 	syscall
 .end_macro
-
 
 .macro read_int
 	li $v0,5
@@ -15,25 +15,26 @@
 	syscall
 .end_macro
 
+# Seccion de datos
 .data
-
 x1: .word 0
 x2: .word 0
 y1: .word 0
 y2: .word 0
 
-agudo: .asciiz "\nForman un angulo agudo"
-obtuso: .asciiz "\nForman un angulo obtuso"
-ortogonal: .asciiz "\nSon ortogonales"
+agudo: .asciiz "Forman un angulo agudo\n"
+obtuso: .asciiz "Forman un angulo obtuso\n"
+ortogonal: .asciiz "Son ortogonales\n"
 
-num1: .asciiz "\nIntroduzca X1: "
-num2: .asciiz "\nIntroduzca Y1: "
-num3: .asciiz "\nIntroduzca X2: "
-num4: .asciiz "\nIntroduzca Y2: "
+num1: .asciiz "Introduzca X1: "
+num2: .asciiz "Introduzca Y1: "
+num3: .asciiz "Introduzca X2: "
+num4: .asciiz "Introduzca Y2: "
 
-fin: .asciiz "\nFin de programa"
+fin: .asciiz "Fin de programa\n"
 .text
 
+# Seccion de codigo
 main:
 	print (num1)
 	read_int	
@@ -43,6 +44,14 @@ main:
 	read_int
 	sw $v0, y1	
 	
+	la $t0, x1
+	lw $t0,0($t0)
+	la $t1, y1
+	lw $t1,0($t1)
+	
+	bne $t0, $t1, else	    # Saltar a 'else' si X1 != Y1, de lo contrario ir a 'end'
+	beqz $t0, end
+else:
 	print (num3)
 	read_int
 	sw $v0, x2	
@@ -51,15 +60,18 @@ main:
 	read_int
 	sw $v0, y2	
 	
+
 	la $a0, x1
 	la $a1, x2
 	la $a2, y1
 	la $a3, y2 
 	jal ang
-	
+
+	j main
+end:
 	print (fin)
 	done
-	
+
 ###################################################################################################################	
 ang:
 	add $sp, $sp, -4
@@ -95,7 +107,7 @@ drotprod:
 	add $sp, $sp, -4
 	sw $ra, 0($sp)
 	
-	beqz $v0, es_ortogonal
+	beqz $v0, es_ortogonal			
 	
 	bltz $v0, es_obtuso
 	print (agudo)
@@ -106,9 +118,8 @@ es_obtuso:
 	
 	j end_drotprod	
 es_ortogonal:
-
 	print (ortogonal)
-	
+
 end_drotprod:
 	lw $ra,0($sp)
 	add $sp, $sp, 4	
